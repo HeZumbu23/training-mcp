@@ -15,6 +15,9 @@ stellt zwei einfache Tools bereit:
 Jeder Tool-Aufruf (inkl. Parameter und Ergebnis) wird protokolliert und auf
 der Konsole (stderr) ausgegeben.
 
+Eine kompakte Referenz speziell für den MCP-Client/das LLM (Verbindungsdaten,
+Tool-Signaturen, Beispiel-Aufrufe) steht in [`LLM_USAGE.md`](./LLM_USAGE.md).
+
 ## Projektstruktur
 
 ```
