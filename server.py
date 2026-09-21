@@ -122,4 +122,7 @@ if __name__ == "__main__":
             args.port,
             path,
         )
-    mcp.run(transport=args.transport)
+    try:
+        mcp.run(transport=args.transport)
+    except KeyboardInterrupt:
+        logger.info("Server durch Strg+C beendet.")
