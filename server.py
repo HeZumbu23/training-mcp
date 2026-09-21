@@ -19,7 +19,9 @@ http://127.0.0.1:8000/sse).
 
 import argparse
 import logging
+import random
 import sys
+from datetime import datetime, timezone
 
 from mcp.server.fastmcp import FastMCP
 
@@ -74,6 +76,37 @@ def add(a: int, b: int) -> int:
     logger.info("Tool-Aufruf: add(a=%s, b=%s)", a, b)
     result = a + b
     logger.info("Tool-Ergebnis: add -> %s", result)
+    return result
+
+
+@mcp.tool()
+def reverse_text(text: str) -> str:
+    """Gibt den uebergebenen Text rueckwaerts zurueck."""
+    logger.info("Tool-Aufruf: reverse_text(text=%r)", text)
+    result = text[::-1]
+    logger.info("Tool-Ergebnis: reverse_text -> %r", result)
+    return result
+
+
+@mcp.tool()
+def current_time() -> str:
+    """Gibt die aktuelle Uhrzeit (UTC, ISO-8601) zurueck."""
+    logger.info("Tool-Aufruf: current_time()")
+    result = datetime.now(timezone.utc).isoformat()
+    logger.info("Tool-Ergebnis: current_time -> %s", result)
+    return result
+
+
+@mcp.tool()
+def roll_dice(sides: int = 6, count: int = 1) -> list[int]:
+    """Wuerfelt 'count' Wuerfel mit je 'sides' Seiten und gibt die Ergebnisse zurueck."""
+    logger.info("Tool-Aufruf: roll_dice(sides=%s, count=%s)", sides, count)
+    if sides < 2:
+        raise ValueError("sides muss mindestens 2 sein.")
+    if not (1 <= count <= 100):
+        raise ValueError("count muss zwischen 1 und 100 liegen.")
+    result = [random.randint(1, sides) for _ in range(count)]
+    logger.info("Tool-Ergebnis: roll_dice -> %s", result)
     return result
 
 

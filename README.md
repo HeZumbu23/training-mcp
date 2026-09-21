@@ -8,6 +8,9 @@ stellt zwei einfache Tools bereit:
 
 - **echo(message)** – gibt den übergebenen Text unverändert zurück.
 - **add(a, b)** – addiert zwei ganze Zahlen.
+- **reverse_text(text)** – gibt den Text rückwärts zurück.
+- **current_time()** – gibt die aktuelle Uhrzeit (UTC, ISO-8601) zurück.
+- **roll_dice(sides=6, count=1)** – würfelt `count` Würfel mit je `sides` Seiten.
 
 Jeder Tool-Aufruf (inkl. Parameter und Ergebnis) wird protokolliert und auf
 der Konsole (stderr) ausgegeben.
