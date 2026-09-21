@@ -8,6 +8,10 @@ Der Server kommuniziert über stdio und stellt zwei einfache Tools bereit:
 - **Echo(message)** – gibt den übergebenen Text unverändert zurück.
 - **Add(a, b)** – addiert zwei ganze Zahlen.
 
+Jeder Tool-Aufruf (inkl. Parameter und Ergebnis) wird über `ILogger` protokolliert
+und auf der Konsole (stderr) ausgegeben. stdout bleibt dabei ausschließlich für
+das MCP-Protokoll reserviert.
+
 ## Projektstruktur
 
 ```
