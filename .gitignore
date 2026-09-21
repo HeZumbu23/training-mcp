@@ -1,4 +1,4 @@
-bin/
-obj/
-.vs/
-*.user
+__pycache__/
+*.pyc
+.venv/
+venv/
