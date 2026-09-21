@@ -1,20 +1,23 @@
 """Minimaler MCP-Server zum Testen der MCP-Integration in Visual Studio.
 
 Stellt zwei einfache Tools bereit (Echo, Add) und protokolliert jeden
-Tool-Aufruf inklusive Parametern und Ergebnis auf der Konsole (stderr).
+Tool-Aufruf inklusive Parametern und Ergebnis.
 
-Standardmaessig laeuft der Server als HTTP-Endpoint (streamable-http)
-unter http://127.0.0.1:8000/mcp:
+Standardmaessig laeuft der Server ueber stdio, da Visual Studio den
+Prozess dabei selbst startet und verwaltet:
 
     python server.py
 
-Host/Port lassen sich anpassen:
+Da VS bei stdio die Konsole des Servers nicht direkt zeigt, wird
+zusaetzlich immer in eine Log-Datei (logs/server.log) geschrieben, die
+sich unabhaengig davon mitlesen laesst, z. B.:
 
-    python server.py --host 0.0.0.0 --port 9000
+    tail -f logs/server.log
 
-Optional kann er ueber --transport stdio/sse mit einem anderen
-Transport gestartet werden (bei --transport sse unter
-http://127.0.0.1:8000/sse).
+Optional kann der Server auch als HTTP-Endpoint gestartet werden, z. B.
+zum manuellen Testen mit dem MCP Inspector:
+
+    python server.py --transport streamable-http --host 127.0.0.1 --port 8000
 """
 
 import argparse
@@ -22,15 +25,12 @@ import logging
 import random
 import sys
 from datetime import datetime, timezone
+from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 
-logging.basicConfig(
-    stream=sys.stderr,
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-)
-logger = logging.getLogger("dummy-mcp-server")
+LOG_DIR = Path(__file__).resolve().parent / "logs"
+LOG_FILE = LOG_DIR / "server.log"
 
 
 def parse_args() -> argparse.Namespace:
@@ -38,9 +38,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--transport",
         choices=["stdio", "streamable-http", "sse"],
-        default="streamable-http",
-        help="Transport-Art: streamable-http (Default, HTTP-Endpoint), "
-        "sse oder stdio (fuer Clients, die den Prozess selbst starten).",
+        default="stdio",
+        help="Transport-Art: stdio (Default, fuer Visual Studio) oder "
+        "streamable-http/sse (HTTP-Endpoint zum manuellen Testen).",
     )
     parser.add_argument(
         "--host",
@@ -53,10 +53,29 @@ def parse_args() -> argparse.Namespace:
         default=8000,
         help="Port, an den gebunden wird (nur bei --transport http/sse).",
     )
+    parser.add_argument(
+        "--log-file",
+        default=str(LOG_FILE),
+        help=f"Pfad der Log-Datei (Default: {LOG_FILE}).",
+    )
     return parser.parse_args()
 
 
 args = parse_args()
+
+log_path = Path(args.log_file)
+log_path.parent.mkdir(parents=True, exist_ok=True)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler(log_path, encoding="utf-8"),
+        logging.StreamHandler(sys.stderr),
+    ],
+)
+logger = logging.getLogger("dummy-mcp-server")
+logger.info("Log-Datei: %s", log_path)
 
 mcp = FastMCP("dummy-mcp-server", host=args.host, port=args.port)
 

@@ -1,4 +1,4 @@
-# dummy-mcp-server
+﻿# dummy-mcp-server
 
 Ein minimaler Model Context Protocol (MCP) Server in Python, gedacht zum
 Ausprobieren und Analysieren des MCP-Einsatzes in Visual Studio.

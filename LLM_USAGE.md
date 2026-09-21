@@ -1,4 +1,4 @@
-# dummy-mcp-server – Nutzungsanleitung für LLM/Agent-Clients
+﻿# dummy-mcp-server – Nutzungsanleitung für LLM/Agent-Clients
 
 Diese Datei richtet sich an ein LLM bzw. einen MCP-Client (z. B. Visual
 Studio / GitHub Copilot Agent Mode), das diesen Server ansteuert. Sie
