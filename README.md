@@ -15,31 +15,30 @@ MCP-Protokoll reserviert.
 ## Projektstruktur
 
 ```
-dummy_mcp_server/
-  server.py
-  requirements.txt
-  run.sh
-  run.bat
+server.py
+requirements.txt
+run.sh
+run.bat
 ```
 
 ## Schnellstart (ein Befehl)
 
 ```bash
-./dummy_mcp_server/run.sh
+./run.sh
 ```
 
 Windows:
 
 ```bat
-dummy_mcp_server\run.bat
+run.bat
 ```
 
-Das Skript installiert die Abhängigkeiten (`mcp`) und startet den Server.
+Das Skript installiert die Abhängigkeit (`mcp`, Version < 2.0 – siehe
+Hinweis unten) und startet den Server.
 
 ## Setup & lokaler Start (mit venv, optional)
 
 ```bash
-cd dummy_mcp_server
 python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -51,7 +50,8 @@ Log-Ausgaben erscheinen auf der Konsole (stderr).
 
 ## Einbindung in Visual Studio
 
-1. Python-Umgebung wie oben beschrieben einrichten (venv + `pip install -r requirements.txt`).
+1. Abhängigkeiten installieren, z. B. mit `./run.sh` einmal ausführen
+   (oder `pip install -r requirements.txt`, optional in einem venv).
 2. In der MCP-Server-Konfiguration des jeweiligen Visual-Studio-Features
    (z. B. GitHub Copilot Chat / Agent Mode) einen neuen stdio-MCP-Server
    eintragen, der den Server startet, z. B.:
@@ -61,20 +61,33 @@ Log-Ausgaben erscheinen auf der Konsole (stderr).
      "servers": {
        "dummy-mcp-server": {
          "type": "stdio",
-         "command": "<pfad-zum-repo>/dummy_mcp_server/.venv/bin/python",
+         "command": "python3",
          "args": [
-           "<pfad-zum-repo>/dummy_mcp_server/server.py"
+           "<pfad-zum-repo>/server.py"
          ]
        }
      }
    }
    ```
 
-   (Unter Windows entsprechend `...\.venv\Scripts\python.exe`.)
+   (Unter Windows `python` bzw. den Pfad zur `.venv\Scripts\python.exe`,
+   falls ein venv verwendet wird.)
 
 3. Nach dem Verbinden sollten die Tools `echo` und `add` im MCP-Client
    sichtbar sein und aufgerufen werden können; jeder Aufruf wird in der
    Konsole protokolliert.
+
+## Hinweis zur `mcp`-Paketversion
+
+Das Paket `mcp` auf PyPI hat ab Version 2.0 seine interne Modulstruktur
+geändert; `mcp.server.fastmcp` existiert dort nicht mehr in der gewohnten
+Form, was zu `ModuleNotFoundError: No module named 'mcp.server.fastmcp'`
+führen kann. `requirements.txt` pinnt deshalb bewusst auf
+`mcp>=1.2.0,<2.0.0`. Falls bereits eine 2.x-Version installiert ist:
+
+```bash
+pip install "mcp>=1.2.0,<2.0.0" --force-reinstall
+```
 
 ## Hinweis
 
