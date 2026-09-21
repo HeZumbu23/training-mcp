@@ -5,4 +5,4 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 pip install -q -r "$SCRIPT_DIR/requirements.txt"
-exec python3 "$SCRIPT_DIR/server.py"
+exec python3 "$SCRIPT_DIR/server.py" "$@"

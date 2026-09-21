@@ -1,10 +1,18 @@
-"""Minimaler MCP-Server (stdio) zum Testen der MCP-Integration in Visual Studio.
+"""Minimaler MCP-Server zum Testen der MCP-Integration in Visual Studio.
 
 Stellt zwei einfache Tools bereit (Echo, Add) und protokolliert jeden
 Tool-Aufruf inklusive Parametern und Ergebnis auf der Konsole (stderr).
-stdout bleibt dabei ausschliesslich fuer das MCP-Protokoll reserviert.
+
+Standardmaessig laeuft der Server ueber stdio. Optional kann er ueber
+--transport streamable-http|sse als HTTP-Endpoint gestartet werden, z. B.:
+
+    python server.py --transport streamable-http --host 127.0.0.1 --port 8000
+
+Der Endpoint ist dann unter http://127.0.0.1:8000/mcp erreichbar
+(bei --transport sse unter http://127.0.0.1:8000/sse).
 """
 
+import argparse
 import logging
 import sys
 
@@ -17,7 +25,33 @@ logging.basicConfig(
 )
 logger = logging.getLogger("dummy-mcp-server")
 
-mcp = FastMCP("dummy-mcp-server")
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="dummy-mcp-server")
+    parser.add_argument(
+        "--transport",
+        choices=["stdio", "streamable-http", "sse"],
+        default="stdio",
+        help="Transport-Art: stdio (Default, fuer Visual Studio) oder "
+        "streamable-http/sse (HTTP-Endpoint zum Testen z. B. mit MCP Inspector).",
+    )
+    parser.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="Host, an den gebunden wird (nur bei --transport http/sse).",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8000,
+        help="Port, an den gebunden wird (nur bei --transport http/sse).",
+    )
+    return parser.parse_args()
+
+
+args = parse_args()
+
+mcp = FastMCP("dummy-mcp-server", host=args.host, port=args.port)
 
 
 @mcp.tool()
@@ -39,5 +73,15 @@ def add(a: int, b: int) -> int:
 
 
 if __name__ == "__main__":
-    logger.info("Starte dummy-mcp-server (stdio transport)...")
-    mcp.run(transport="stdio")
+    if args.transport == "stdio":
+        logger.info("Starte dummy-mcp-server (stdio transport)...")
+    else:
+        path = "/mcp" if args.transport == "streamable-http" else "/sse"
+        logger.info(
+            "Starte dummy-mcp-server (%s transport) auf http://%s:%s%s ...",
+            args.transport,
+            args.host,
+            args.port,
+            path,
+        )
+    mcp.run(transport=args.transport)

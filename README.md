@@ -36,6 +36,29 @@ run.bat
 Das Skript installiert die Abhängigkeit (`mcp`, Version < 2.0 – siehe
 Hinweis unten) und startet den Server.
 
+## Transport / Endpoint beim Start angeben
+
+Standardmäßig läuft der Server über **stdio** (für die Einbindung in
+Visual Studio, siehe unten). Optional kann er auch als HTTP-Endpoint
+gestartet werden, z. B. zum Testen mit dem
+[MCP Inspector](https://github.com/modelcontextprotocol/inspector):
+
+```bash
+./run.sh --transport streamable-http --host 127.0.0.1 --port 8000
+# Endpoint: http://127.0.0.1:8000/mcp
+
+./run.sh --transport sse --host 127.0.0.1 --port 8000
+# Endpoint: http://127.0.0.1:8000/sse
+```
+
+Parameter:
+
+| Flag          | Default     | Beschreibung                                   |
+|---------------|-------------|-------------------------------------------------|
+| `--transport` | `stdio`     | `stdio`, `streamable-http` oder `sse`           |
+| `--host`      | `127.0.0.1` | Bind-Adresse (nur bei http/sse)                 |
+| `--port`      | `8000`      | Port (nur bei http/sse)                         |
+
 ## Setup & lokaler Start (mit venv, optional)
 
 ```bash
