@@ -3,14 +3,14 @@
 Ein minimaler Model Context Protocol (MCP) Server in Python, gedacht zum
 Ausprobieren und Analysieren des MCP-Einsatzes in Visual Studio.
 
-Der Server kommuniziert über stdio und stellt zwei einfache Tools bereit:
+Der Server läuft standardmäßig als **HTTP-Endpoint** (streamable-http) und
+stellt zwei einfache Tools bereit:
 
 - **echo(message)** – gibt den übergebenen Text unverändert zurück.
 - **add(a, b)** – addiert zwei ganze Zahlen.
 
 Jeder Tool-Aufruf (inkl. Parameter und Ergebnis) wird protokolliert und auf
-der Konsole (stderr) ausgegeben. stdout bleibt dabei ausschließlich für das
-MCP-Protokoll reserviert.
+der Konsole (stderr) ausgegeben.
 
 ## Projektstruktur
 
@@ -34,30 +34,33 @@ run.bat
 ```
 
 Das Skript installiert die Abhängigkeit (`mcp`, Version < 2.0 – siehe
-Hinweis unten) und startet den Server.
+Hinweis unten) und startet den Server. Der Endpoint ist danach unter
+**http://127.0.0.1:8000/mcp** erreichbar; die Konsole zeigt live jeden
+Tool-Aufruf.
 
 ## Transport / Endpoint beim Start angeben
 
-Standardmäßig läuft der Server über **stdio** (für die Einbindung in
-Visual Studio, siehe unten). Optional kann er auch als HTTP-Endpoint
-gestartet werden, z. B. zum Testen mit dem
-[MCP Inspector](https://github.com/modelcontextprotocol/inspector):
+Default ist `streamable-http` auf `127.0.0.1:8000`. Host/Port lassen sich
+anpassen, und alternative Transporte sind möglich:
 
 ```bash
-./run.sh --transport streamable-http --host 127.0.0.1 --port 8000
-# Endpoint: http://127.0.0.1:8000/mcp
+./run.sh --host 0.0.0.0 --port 9000
+# Endpoint: http://0.0.0.0:9000/mcp
 
 ./run.sh --transport sse --host 127.0.0.1 --port 8000
 # Endpoint: http://127.0.0.1:8000/sse
+
+./run.sh --transport stdio
+# fuer Clients, die den Prozess selbst starten (siehe unten)
 ```
 
 Parameter:
 
-| Flag          | Default     | Beschreibung                                   |
-|---------------|-------------|-------------------------------------------------|
-| `--transport` | `stdio`     | `stdio`, `streamable-http` oder `sse`           |
-| `--host`      | `127.0.0.1` | Bind-Adresse (nur bei http/sse)                 |
-| `--port`      | `8000`      | Port (nur bei http/sse)                         |
+| Flag          | Default            | Beschreibung                          |
+|---------------|--------------------|-----------------------------------------|
+| `--transport` | `streamable-http`  | `streamable-http`, `sse` oder `stdio`   |
+| `--host`      | `127.0.0.1`        | Bind-Adresse (nur bei http/sse)         |
+| `--port`      | `8000`             | Port (nur bei http/sse)                 |
 
 ## Setup & lokaler Start (mit venv, optional)
 
@@ -68,37 +71,42 @@ pip install -r requirements.txt
 python server.py
 ```
 
-Der Server wartet danach auf stdio-Eingaben gemäß MCP-Protokoll; die
-Log-Ausgaben erscheinen auf der Konsole (stderr).
-
 ## Einbindung in Visual Studio
 
-1. Abhängigkeiten installieren, z. B. mit `./run.sh` einmal ausführen
-   (oder `pip install -r requirements.txt`, optional in einem venv).
-2. In der MCP-Server-Konfiguration des jeweiligen Visual-Studio-Features
-   (z. B. GitHub Copilot Chat / Agent Mode) einen neuen stdio-MCP-Server
-   eintragen, der den Server startet, z. B.:
+Als HTTP-Server trägst du nur den Endpoint ein, Visual Studio startet den
+Prozess **nicht** selbst – der Server muss also vorher laufen (z. B. via
+`./run.sh` in einem eigenen Terminal):
 
-   ```json
-   {
-     "servers": {
-       "dummy-mcp-server": {
-         "type": "stdio",
-         "command": "python3",
-         "args": [
-           "<pfad-zum-repo>/server.py"
-         ]
-       }
-     }
-   }
-   ```
+```json
+{
+  "servers": {
+    "dummy-mcp-server": {
+      "type": "http",
+      "url": "http://127.0.0.1:8000/mcp"
+    }
+  }
+}
+```
 
-   (Unter Windows `python` bzw. den Pfad zur `.venv\Scripts\python.exe`,
-   falls ein venv verwendet wird.)
+Falls dein MCP-Client stattdessen stdio erwartet (er startet den Server
+dann selbst als Kindprozess), lässt sich der Server weiterhin so
+konfigurieren:
 
-3. Nach dem Verbinden sollten die Tools `echo` und `add` im MCP-Client
-   sichtbar sein und aufgerufen werden können; jeder Aufruf wird in der
-   Konsole protokolliert.
+```json
+{
+  "servers": {
+    "dummy-mcp-server": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["<pfad-zum-repo>/server.py", "--transport", "stdio"]
+    }
+  }
+}
+```
+
+Nach dem Verbinden sollten die Tools `echo` und `add` im MCP-Client
+sichtbar sein und aufgerufen werden können; jeder Aufruf wird auf der
+Konsole protokolliert, in der der Server läuft.
 
 ## Hinweis zur `mcp`-Paketversion
 

@@ -3,13 +3,18 @@
 Stellt zwei einfache Tools bereit (Echo, Add) und protokolliert jeden
 Tool-Aufruf inklusive Parametern und Ergebnis auf der Konsole (stderr).
 
-Standardmaessig laeuft der Server ueber stdio. Optional kann er ueber
---transport streamable-http|sse als HTTP-Endpoint gestartet werden, z. B.:
+Standardmaessig laeuft der Server als HTTP-Endpoint (streamable-http)
+unter http://127.0.0.1:8000/mcp:
 
-    python server.py --transport streamable-http --host 127.0.0.1 --port 8000
+    python server.py
 
-Der Endpoint ist dann unter http://127.0.0.1:8000/mcp erreichbar
-(bei --transport sse unter http://127.0.0.1:8000/sse).
+Host/Port lassen sich anpassen:
+
+    python server.py --host 0.0.0.0 --port 9000
+
+Optional kann er ueber --transport stdio/sse mit einem anderen
+Transport gestartet werden (bei --transport sse unter
+http://127.0.0.1:8000/sse).
 """
 
 import argparse
@@ -31,9 +36,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--transport",
         choices=["stdio", "streamable-http", "sse"],
-        default="stdio",
-        help="Transport-Art: stdio (Default, fuer Visual Studio) oder "
-        "streamable-http/sse (HTTP-Endpoint zum Testen z. B. mit MCP Inspector).",
+        default="streamable-http",
+        help="Transport-Art: streamable-http (Default, HTTP-Endpoint), "
+        "sse oder stdio (fuer Clients, die den Prozess selbst starten).",
     )
     parser.add_argument(
         "--host",
