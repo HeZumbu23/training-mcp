@@ -18,9 +18,25 @@ MCP-Protokoll reserviert.
 dummy_mcp_server/
   server.py
   requirements.txt
+  run.sh
+  run.bat
 ```
 
-## Setup & lokaler Start
+## Schnellstart (ein Befehl)
+
+```bash
+./dummy_mcp_server/run.sh
+```
+
+Windows:
+
+```bat
+dummy_mcp_server\run.bat
+```
+
+Das Skript installiert die Abhängigkeiten (`mcp`) und startet den Server.
+
+## Setup & lokaler Start (mit venv, optional)
 
 ```bash
 cd dummy_mcp_server
